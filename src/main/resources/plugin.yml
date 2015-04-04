@@ -1,23 +1,15 @@
 name: EithonLibraryPlugin
 main: se.fredsfursten.eithonlibraryplugin.EithonLibraryPlugin
-version: 1.4.2
+version: 1.0
 author: vanbrayne
 depend: [Essentials]
-description: A Minecraft plugin for Eithon fixes
+description: A Minecraft plugin for the Eithon Java Library that supports plugin development
 commands:
-  eithonfixes:
-    description: Fix things other plugins fail to do
-    usage: /eithonfixes buy | balance
+  eithonlibrary:
+    description: Should not need to be used?
+    usage: /eithonfixes
     permission-message: You don't have <permission>
 permissions:
-  eithonfixes.*:
-    description: Gives access to all eithonfixes commands
-    default: op
-    eithonfixes.buy: true
-    eithonfixes.balance: true
-  eithonfixes.buy:
-    description: Access to /eithonfixes buy command
-    default: op
-  eithonfixes.balance:
-    description: Access to /eithonfixes balance command
+  eithonlibrary.*:
+    description: Gives access to all eithonlibrary commands
     default: op
