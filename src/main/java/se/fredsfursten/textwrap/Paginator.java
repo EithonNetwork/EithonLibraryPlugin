@@ -74,8 +74,6 @@ public class Paginator {
 		StringBuilder word = new StringBuilder();
 		StringBuilder line = new StringBuilder();
 		List<String> lines = new LinkedList<String>();
-		int lineColorChars = 0;
-
 		for (int i = 0; i < rawChars.length; i++) {
 			int lineInPixels = 0;
 			int wordInPixels = 0;
@@ -84,7 +82,6 @@ public class Paginator {
 			// skip chat color modifiers
 			if (c == ChatColor.COLOR_CHAR) {
 				word.append(ChatColor.getByChar(rawChars[i + 1]));
-				lineColorChars += 2;
 				i++; // Eat the next character as we have already processed it
 				continue;
 			}
@@ -108,7 +105,6 @@ public class Paginator {
 					lines.add(line.toString());
 					line = new StringBuilder();
 					lineInPixels = 0;
-					lineColorChars = 0;
 				} 
 
 				if (c == ' ') {
@@ -123,21 +119,22 @@ public class Paginator {
 					wordInPixels += characterInPixels;
 				}
 			}
-
-			// Iterate over the wrapped lines, applying the last color from one line to the beginning of the next
-			if (lines.get(0).length() == 0 || lines.get(0).charAt(0) != ChatColor.COLOR_CHAR) {
-				lines.set(0, ChatColor.WHITE + lines.get(0));
-			}
-			for (int j = 1; j < lines.size(); j++) {
-				final String pLine = lines.get(j-1);
-				final String subLine = lines.get(j);
-
-				char color = pLine.charAt(pLine.lastIndexOf(ChatColor.COLOR_CHAR) + 1);
-				if (subLine.length() == 0 || subLine.charAt(0) != ChatColor.COLOR_CHAR) {
-					lines.set(j, ChatColor.getByChar(color) + subLine);
-				}
-			}
-
-			return lines.toArray(new String[lines.size()]);
 		}
+
+		// Iterate over the wrapped lines, applying the last color from one line to the beginning of the next
+		if (lines.get(0).length() == 0 || lines.get(0).charAt(0) != ChatColor.COLOR_CHAR) {
+			lines.set(0, ChatColor.WHITE + lines.get(0));
+		}
+		for (int j = 1; j < lines.size(); j++) {
+			final String pLine = lines.get(j-1);
+			final String subLine = lines.get(j);
+
+			char color = pLine.charAt(pLine.lastIndexOf(ChatColor.COLOR_CHAR) + 1);
+			if (subLine.length() == 0 || subLine.charAt(0) != ChatColor.COLOR_CHAR) {
+				lines.set(j, ChatColor.getByChar(color) + subLine);
+			}
+		}
+
+		return lines.toArray(new String[lines.size()]);
 	}
+}
