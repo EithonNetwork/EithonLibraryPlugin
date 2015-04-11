@@ -63,6 +63,7 @@ public class FontPixels
 
 	private void initializeHashMap() 
 	{	
+		pixelWidths.put ("\n", new Integer(0));
 		pixelWidths.put ("☺", new Integer(9));
 		pixelWidths.put ("☻", new Integer(9));
 		pixelWidths.put ("♥", new Integer(8));

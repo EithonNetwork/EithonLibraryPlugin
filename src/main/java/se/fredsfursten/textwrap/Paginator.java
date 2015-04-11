@@ -3,7 +3,7 @@ package se.fredsfursten.textwrap;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 
 /**
  * The ChatPaginator takes a raw string of arbitrary length and breaks it down
@@ -115,11 +115,6 @@ public class Paginator {
 				}
 				lines.add(line.toString());
 				String message = null;
-				if (lastBreakWasAutoBreak) message = String.format(
-						"Auto (%d, %d, %d): %s", lineInPixels, wordInPixels, characterInPixels, line.toString());
-				else message = String.format(
-						"Hard (%d, %d, %d): %s", lineInPixels, wordInPixels, characterInPixels, line.toString());
-				if (System.console() != null) System.console().printf("\"%s\"", message);
 				line = new StringBuilder();
 				lineInPixels = 0;
 				lineVisibleCharacters = 0;
@@ -162,6 +157,22 @@ public class Paginator {
 			lineVisibleCharacters += wordVisibleCharacters;
 		}
 		if (lineVisibleCharacters > 0) lines.add(line.toString());
+		
+
+
+        // Iterate over the wrapped lines, applying the last color from one line to the beginning of the next
+        if (lines.get(0).length() == 0 || lines.get(0).charAt(0) != ChatColor.COLOR_CHAR) {
+            lines.set(0, ChatColor.GRAY + lines.get(0));
+        }
+        for (int i = 1; i < lines.size(); i++) {
+            final String pLine = lines.get(i-1);
+            final String subLine = lines.get(i);
+
+            char color = pLine.charAt(pLine.lastIndexOf(ChatColor.COLOR_CHAR) + 1);
+            if (subLine.length() == 0 || subLine.charAt(0) != ChatColor.COLOR_CHAR) {
+                lines.set(i, ChatColor.getByChar(color) + subLine);
+            }
+        }
 
 		return lines.toArray(new String[lines.size()]);
 	}
