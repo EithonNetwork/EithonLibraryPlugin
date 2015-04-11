@@ -12,15 +12,52 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class PluginConfig {
+	private static PluginConfig singleton = null;
 	File configFile;
 	FileConfiguration config;
 	private int doDebugPrint;
 
+	private PluginConfig()
+	{
+	}
+	
+	@Deprecated
 	public PluginConfig(JavaPlugin plugin, String fileName) {
+		initialize(plugin, fileName);
+	}
+	
+	public static void enable(JavaPlugin plugin, String fileName) {
+		if (singleton != null) {
+			plugin.getLogger().warning("PluginConfig.enable() has already been called, use PluginConfig.isEnabled() to check.");
+			return;
+		}
+		singleton = new PluginConfig();
+		singleton.initialize(plugin, fileName);
+	}
+
+	private void initialize(JavaPlugin plugin, String fileName) {
 		this.configFile = initializeConfigFile(plugin, fileName);
 		this.config = new YamlConfiguration();
 		load();
 		this.doDebugPrint = this.config.getInt("DoDebugPrint");
+	}
+	
+	public static boolean isEnabled() { return singleton != null; }
+	
+	public static PluginConfig get() {
+		if (singleton == null) {
+			Misc.consolePrintF("You must call PluginConfig.enable() from your plugin.");
+		}
+		return singleton;
+	}
+	
+	public static void disable()
+	{
+		singleton = null;
+	}
+
+	boolean shouldDebugPrint() {
+		return this.doDebugPrint > 0;
 	}
 
 	private File initializeConfigFile(JavaPlugin plugin, String fileName) {
@@ -53,6 +90,7 @@ public class PluginConfig {
 		return this.config;
 	}
 
+	@Deprecated
 	public void debugInfo(String format, Object... args) 
 	{
 		if (this.doDebugPrint == 0) return;

@@ -5,7 +5,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 
 public class ConfigurableFormat {
-
 	private static FileConfiguration fileConfiguration;
 	private String _path;
 	private int _parameters;

@@ -10,6 +10,13 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
 public class Misc {
+	private static int doDebugPrint = 0;
+	private static boolean hasReadDoDebugPrint = false;
+	
+	private static boolean doDebugPrint() {
+		return PluginConfig.get().shouldDebugPrint();
+	}
+	
 	public static Block getFirstBlockOfMaterial(Material material, Location location, int maxDistance) {
 		int x1 = location.getBlockX(); 
 		int y1 = location.getBlockY();
@@ -53,5 +60,19 @@ public class Misc {
 	public static void executeCommand(String command)
 	{
 		Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), command);
+	}
+	
+	public static void consolePrintF(String format, Object... args) {
+		if (System.console() != null) System.console().printf(format, args);
+	}
+
+	public static void debugInfo(String format, Object... args) 
+	{
+		if (!doDebugPrint()) return;
+		try {
+			Bukkit.getLogger().info(String.format(format, args));
+		} catch (Exception e) {
+			Bukkit.getLogger().warning(String.format("Wrong format? \"%s\", %d arguments: %s", format, args.length, e.getMessage()));
+		}
 	}
 }
