@@ -1,8 +1,6 @@
 package se.fredsfursten.textwrap;
 import java.util.HashMap;
 
-import org.bukkit.Bukkit;
-
 public class FontPixels
 {
 	private static FontPixels singleton = null;
@@ -22,9 +20,10 @@ public class FontPixels
 
 	public int pixelWidth(char c)
 	{
-		Integer width = pixelWidths.get(c);
+		Integer width = pixelWidths.get(Character.toString(c));
 		if (width == null) {
-			Bukkit.getLogger().warning(String.format("No pixel width for character '%s'", c));
+			String message = String.format("No pixel width for character '%s'", c);
+			System.console().printf("%s", message);
 			return 0;
 		}
 		return width;

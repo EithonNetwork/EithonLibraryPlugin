@@ -1,8 +1,5 @@
 package se.fredsfursten.textwrap;
 
-import org.bukkit.ChatColor;
-import org.bukkit.util.Java15Compat;
-
 import java.util.LinkedList;
 import java.util.List;
 
@@ -12,7 +9,6 @@ import java.util.List;
  * console.
  */
 public class Paginator {
-	public static final int PAGE_WIDTH_IN_FONT_PIXELS = 600; // Will never wrap, even with the largest characters
 	public static final int UNBOUNDED_PAGE_WIDTH = Integer.MAX_VALUE;
 	public static final int OPEN_CHAT_PAGE_HEIGHT = 20; // The height of an expanded chat window
 	public static final int CLOSED_CHAT_PAGE_HEIGHT = 10; // The height of the default chat window
@@ -25,8 +21,9 @@ public class Paginator {
 	 * @param pageNumber The page number to fetch.
 	 * @return A single chat page.
 	 */
-	public static ChatPage paginate(String unpaginatedString, int pageNumber) {
-		return  paginate(unpaginatedString, pageNumber, PAGE_WIDTH_IN_FONT_PIXELS, CLOSED_CHAT_PAGE_HEIGHT);
+	public static ChatPage paginate(String unpaginatedString, int pageNumber, int pageWidth, String ignoreCharacters, String ignoreAlsoFollowingCharacter) {
+		return  paginate(unpaginatedString, pageNumber, ignoreCharacters, ignoreAlsoFollowingCharacter, 
+				pageWidth, CLOSED_CHAT_PAGE_HEIGHT);
 	}
 
 	/**
@@ -38,15 +35,18 @@ public class Paginator {
 	 * @param pageHeight The desired number of lines in a page.
 	 * @return A single chat page.
 	 */
-	public static ChatPage paginate(String unpaginatedString, int pageNumber, int lineLength, int pageHeight) {
-		String[] lines = wordWrap(unpaginatedString, lineLength);
+	public static ChatPage paginate(String unpaginatedString, int pageNumber, String ignoreCharacters, String ignoreAlsoFollowingCharacter, int lineLength, int pageHeight) {
+		String[] lines = wordWrap(unpaginatedString, lineLength, ignoreCharacters, ignoreAlsoFollowingCharacter);
 
 		int totalPages = lines.length / pageHeight + (lines.length % pageHeight == 0 ? 0 : 1);
 		int actualPageNumber = pageNumber <= totalPages ? pageNumber : totalPages;
 
 		int from = (actualPageNumber - 1) * pageHeight;
 		int to = from + pageHeight <= lines.length  ? from + pageHeight : lines.length;
-		String[] selectedLines = Java15Compat.Arrays_copyOfRange(lines, from, to);
+		String[] selectedLines = new String[to-from];
+		for (int i = from; i < to; i++) {
+			selectedLines[i-from] = lines[i];
+		}
 
 		return new ChatPage(selectedLines, actualPageNumber, totalPages);
 	}
@@ -59,82 +59,93 @@ public class Paginator {
 	 * @param lineLength The length of a line of text.
 	 * @return An array of word-wrapped lines.
 	 */
-	public static String[] wordWrap(String rawString, int lineLength) {
+	public static String[] wordWrap(String rawString, int lineLength, String ignoreCharacters, String ignoreAlsoFollowingCharacter) {
 		// A null string is a single line
 		if (rawString == null) {
 			return new String[] {""};
-		}
-
-		// A string shorter than the lineWidth is a single line
-		if (rawString.length() <= lineLength && !rawString.contains("\n")) {
-			return new String[] {rawString};
 		}
 
 		char[] rawChars = (rawString + ' ').toCharArray(); // add a trailing space to trigger pagination
 		StringBuilder word = new StringBuilder();
 		StringBuilder line = new StringBuilder();
 		List<String> lines = new LinkedList<String>();
+		int lineInPixels = 0;
+		int wordInPixels = 0;
 		for (int i = 0; i < rawChars.length; i++) {
-			int lineInPixels = 0;
-			int wordInPixels = 0;
 			char c = rawChars[i];
+			boolean lastBreakWasAutoBreak = false;
 
-			// skip chat color modifiers
-			if (c == ChatColor.COLOR_CHAR) {
-				word.append(ChatColor.getByChar(rawChars[i + 1]));
-				i++; // Eat the next character as we have already processed it
+			if (ignoreAlsoFollowingCharacter.contains(Character.toString(c))) {
+				word.append(c);
+				i++;
+				c = rawChars[i];
+				word.append(c);
 				continue;
 			}
+			if (ignoreCharacters.contains(Character.toString(c))) {
+				word.append(c);
+				continue;
+			}
+			
+			int characterInPixels = FontPixels.get().pixelWidth(c);
 
+			// Time for a line break?
+			boolean timeToBreak = false;
 			if (c == '\n') {
+				// A "hard" break
+				timeToBreak = true;
+				lastBreakWasAutoBreak = false;
+			} else if (lineInPixels + wordInPixels + characterInPixels > lineLength) {
 				// Break the line
+				timeToBreak = true;
+				lastBreakWasAutoBreak = true;
+			}
+
+			if (timeToBreak) {
 				line.append(word);
 				lineInPixels += wordInPixels;
-				lines.add(line.toString());
-				lineInPixels = 0;
 				word = new StringBuilder();
 				wordInPixels = 0;
-			} else {
-				int characterInPixels = FontPixels.get().pixelWidth(c);
-				if (lineInPixels + wordInPixels + characterInPixels> lineLength) {
-					// Break the line
+				lines.add(line.toString());
+				String message = null;
+				if (lastBreakWasAutoBreak) message = String.format(
+						"Auto (%d, %d, %d): %s", lineInPixels, wordInPixels, characterInPixels, line.toString());
+				else message = String.format(
+						"Hard (%d, %d, %d): %s", lineInPixels, wordInPixels, characterInPixels, line.toString());
+				line = new StringBuilder();
+				lineInPixels = 0;
+			}
+
+			switch (c) {
+			case '\n':
+				// Already taken care of
+				break;
+			case ' ':
+				if (word.length() > 0) {
+					// This space is after an earlier word
 					line.append(word);
 					lineInPixels += wordInPixels;
-					word = new StringBuilder();
-					wordInPixels = 0;
-					lines.add(line.toString());
-					line = new StringBuilder();
-					lineInPixels = 0;
-				} 
-
-				if (c == ' ') {
-					if (word.length() > 0) {
-						line.append(word);
-						lineInPixels += wordInPixels;
-						word = new StringBuilder(" ");
-						wordInPixels = characterInPixels;
-					}
+					word = new StringBuilder(c);
+					wordInPixels = characterInPixels;
+				} else if (!lastBreakWasAutoBreak) {
+					// This is an indenting space
+					line.append(c);
+					lineInPixels += characterInPixels;
 				} else {
-					word.append(c);
-					wordInPixels += characterInPixels;
+					// This is a space in the beginning of the line, after an auto break
+					// Ignore the space
 				}
+				break;
+			default:
+				word.append(c);
+				wordInPixels += characterInPixels;
+				break;
 			}
 		}
-
-		// Iterate over the wrapped lines, applying the last color from one line to the beginning of the next
-		if (lines.get(0).length() == 0 || lines.get(0).charAt(0) != ChatColor.COLOR_CHAR) {
-			lines.set(0, ChatColor.WHITE + lines.get(0));
-		}
-		for (int j = 1; j < lines.size(); j++) {
-			final String pLine = lines.get(j-1);
-			final String subLine = lines.get(j);
-
-			char color = pLine.charAt(pLine.lastIndexOf(ChatColor.COLOR_CHAR) + 1);
-			if (subLine.length() == 0 || subLine.charAt(0) != ChatColor.COLOR_CHAR) {
-				lines.set(j, ChatColor.getByChar(color) + subLine);
-			}
-		}
-
+		
+		if (word.length() > 0) line.append(word);		
+		if (line.length() > 0) lines.add(line.toString());
+		
 		return lines.toArray(new String[lines.size()]);
 	}
 }
