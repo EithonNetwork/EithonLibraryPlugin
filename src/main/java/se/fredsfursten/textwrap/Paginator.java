@@ -3,6 +3,8 @@ package se.fredsfursten.textwrap;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.bukkit.Bukkit;
+
 /**
  * The ChatPaginator takes a raw string of arbitrary length and breaks it down
  * into an array of strings appropriate for displaying on the Minecraft player
@@ -21,7 +23,7 @@ public class Paginator {
 	 * @param pageNumber The page number to fetch.
 	 * @return A single chat page.
 	 */
-	public static ChatPage paginate(String unpaginatedString, int pageNumber, int pageWidth, String ignoreCharacters, String ignoreAlsoFollowingCharacter) {
+	public static ChatPage paginate(String unpaginatedString, int pageNumber, String ignoreCharacters, String ignoreAlsoFollowingCharacter, int pageWidth) {
 		return  paginate(unpaginatedString, pageNumber, ignoreCharacters, ignoreAlsoFollowingCharacter, 
 				pageWidth, CLOSED_CHAT_PAGE_HEIGHT);
 	}
@@ -71,6 +73,8 @@ public class Paginator {
 		List<String> lines = new LinkedList<String>();
 		int lineInPixels = 0;
 		int wordInPixels = 0;
+		int lineVisibleCharacters = 0;
+		int wordVisibleCharacters = 0;
 		for (int i = 0; i < rawChars.length; i++) {
 			char c = rawChars[i];
 			boolean lastBreakWasAutoBreak = false;
@@ -86,7 +90,7 @@ public class Paginator {
 				word.append(c);
 				continue;
 			}
-			
+
 			int characterInPixels = FontPixels.get().pixelWidth(c);
 
 			// Time for a line break?
@@ -96,24 +100,29 @@ public class Paginator {
 				timeToBreak = true;
 				lastBreakWasAutoBreak = false;
 			} else if (lineInPixels + wordInPixels + characterInPixels > lineLength) {
-				// Break the line
 				timeToBreak = true;
 				lastBreakWasAutoBreak = true;
 			}
 
 			if (timeToBreak) {
-				line.append(word);
-				lineInPixels += wordInPixels;
-				word = new StringBuilder();
-				wordInPixels = 0;
+				if (!lastBreakWasAutoBreak || (c == ' ')) {
+					line.append(word);
+					lineInPixels += wordInPixels;
+					lineVisibleCharacters += wordVisibleCharacters;
+					word = new StringBuilder();
+					wordInPixels = 0;
+					wordVisibleCharacters = 0;
+				}
 				lines.add(line.toString());
 				String message = null;
 				if (lastBreakWasAutoBreak) message = String.format(
 						"Auto (%d, %d, %d): %s", lineInPixels, wordInPixels, characterInPixels, line.toString());
 				else message = String.format(
 						"Hard (%d, %d, %d): %s", lineInPixels, wordInPixels, characterInPixels, line.toString());
+				if (System.console() != null) System.console().printf("\"%s\"", message);
 				line = new StringBuilder();
 				lineInPixels = 0;
+				lineVisibleCharacters = 0;
 			}
 
 			switch (c) {
@@ -121,12 +130,16 @@ public class Paginator {
 				// Already taken care of
 				break;
 			case ' ':
-				if (word.length() > 0) {
+				if (wordVisibleCharacters > 0) {
 					// This space is after an earlier word
+					word.append(c);
+					wordInPixels += characterInPixels;
 					line.append(word);
 					lineInPixels += wordInPixels;
-					word = new StringBuilder(c);
-					wordInPixels = characterInPixels;
+					lineVisibleCharacters += wordVisibleCharacters;
+					word = new StringBuilder();
+					wordInPixels = 0;
+					wordVisibleCharacters = 0;
 				} else if (!lastBreakWasAutoBreak) {
 					// This is an indenting space
 					line.append(c);
@@ -138,14 +151,18 @@ public class Paginator {
 				break;
 			default:
 				word.append(c);
+				wordVisibleCharacters++;
 				wordInPixels += characterInPixels;
 				break;
 			}
 		}
-		
-		if (word.length() > 0) line.append(word);		
-		if (line.length() > 0) lines.add(line.toString());
-		
+
+		if (wordVisibleCharacters > 0) {
+			line.append(word);
+			lineVisibleCharacters += wordVisibleCharacters;
+		}
+		if (lineVisibleCharacters > 0) lines.add(line.toString());
+
 		return lines.toArray(new String[lines.size()]);
 	}
 }
