@@ -124,10 +124,6 @@ public class Paginator {
 				}
 			}
 
-			if(lineInPixels > 0) { // Only add the last line if there is anything to add
-				lines.add(line.toString());
-			}
-
 			// Iterate over the wrapped lines, applying the last color from one line to the beginning of the next
 			if (lines.get(0).length() == 0 || lines.get(0).charAt(0) != ChatColor.COLOR_CHAR) {
 				lines.set(0, ChatColor.WHITE + lines.get(0));
