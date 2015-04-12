@@ -80,6 +80,7 @@ public class Misc {
 		}
 	}
 
+	@Deprecated
 	public static void executeCommand(String command)
 	{
 		Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), command);

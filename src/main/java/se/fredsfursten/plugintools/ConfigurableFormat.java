@@ -14,7 +14,7 @@ public class ConfigurableFormat {
 		String value = config.getString(path, defaultValue);
 		this._formatValue = value;
 	}
-	
+
 	public String getFormat() {
 		return this._formatValue;
 	}
@@ -55,5 +55,10 @@ public class ConfigurableFormat {
 			reportFailure(sender, e);
 			return null;
 		}
+	}
+
+	public void execute(Object... args) {
+		String command = getMessage(args);
+		Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), command);
 	}
 }

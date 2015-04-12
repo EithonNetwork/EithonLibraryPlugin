@@ -8,7 +8,6 @@ import se.fredsfursten.plugintools.PluginConfig;
 public final class EithonLibraryPlugin extends JavaPlugin implements Listener {
 	@Override
 	public void onEnable() {
-		PluginConfig.enable(this);
 	}
 
 	@Override
