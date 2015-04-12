@@ -10,9 +10,6 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
 public class Misc {
-	private static int doDebugPrint = 0;
-	private static boolean hasReadDoDebugPrint = false;
-	
 	private static boolean doDebugPrint() {
 		return PluginConfig.get().shouldDebugPrint();
 	}
@@ -68,11 +65,29 @@ public class Misc {
 
 	public static void debugInfo(String format, Object... args) 
 	{
-		if (!doDebugPrint()) return;
+		info(format, args);
+	}
+
+	public static void info(String format, Object... args) 
+	{
 		try {
 			Bukkit.getLogger().info(String.format(format, args));
 		} catch (Exception e) {
 			Bukkit.getLogger().warning(String.format("Wrong format? \"%s\", %d arguments: %s", format, args.length, e.getMessage()));
 		}
+	}
+
+	public static void warning(String format, Object... args) 
+	{
+		try {
+			Bukkit.getLogger().warning(String.format(format, args));
+		} catch (Exception e) {
+			Bukkit.getLogger().warning(String.format("Wrong format? \"%s\", %d arguments: %s", format, args.length, e.getMessage()));
+		}
+	}
+
+	public static void error(String format, Object... args) 
+	{
+		warning(format, args);
 	}
 }
