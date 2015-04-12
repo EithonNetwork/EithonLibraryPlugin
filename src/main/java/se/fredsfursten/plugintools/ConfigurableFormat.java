@@ -2,33 +2,19 @@ package se.fredsfursten.plugintools;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.file.FileConfiguration;
 
 public class ConfigurableFormat {
-
-	private static FileConfiguration fileConfiguration;
 	private String _path;
 	private int _parameters;
 	private String _formatValue;
 
-	public ConfigurableFormat(String path, int parameters, String defaultValue) {
+	public ConfigurableFormat(PluginConfig config, String path, int parameters, String defaultValue) {
 		this._path = path;
 		this._parameters = parameters;
-		String value = fileConfiguration.getString(path);
-		if (value == null) {
-			Bukkit.getLogger().warning(String.format(
-					"No configuration setting for format with path %s. Will use the default value, \"%s\".",
-					path, defaultValue));
-			value = defaultValue;
-		}
-
+		String value = config.getString(path, defaultValue);
 		this._formatValue = value;
 	}
-
-	public static void enable(FileConfiguration configuration) {
-		fileConfiguration = configuration;
-	}
-
+	
 	public String getFormat() {
 		return this._formatValue;
 	}
