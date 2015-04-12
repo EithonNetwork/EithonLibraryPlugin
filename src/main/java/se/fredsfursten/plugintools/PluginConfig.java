@@ -6,11 +6,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
+import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class PluginConfig {
@@ -76,6 +76,25 @@ public class PluginConfig {
 		return result;
 	}
 	
+	public List<Integer> getIntegerList(String path)
+	{
+		List<Integer> result = null;
+		try {
+			result = this.config.getIntegerList(path);
+		} catch (Exception ex) {
+			Misc.warning("Failed to read configuration \"%s\", will use default value.", path);
+		}
+		String s = "";
+		boolean first = true;
+		for (Integer integer : result) {
+			if (first) first = false;
+			else s += ", ";
+			s += integer.toString();
+		}
+		Misc.debugInfo("Configuration \"%s\" = [%s]" , path, s);
+		return result;
+	}
+	
 	public String getString(String path, String defaultValue)
 	{
 		String result;
@@ -86,6 +105,25 @@ public class PluginConfig {
 			result = defaultValue;
 		}
 		Misc.debugInfo("Configuration \"%s\" = %s" , path, result);
+		return result;
+	}
+	
+	public List<String> getStringList(String path)
+	{
+		List<String> result = null;
+		try {
+			result = this.config.getStringList(path);
+		} catch (Exception ex) {
+			Misc.warning("Failed to read configuration \"%s\", will use default value.", path);
+		}
+		String s = "";
+		boolean first = true;
+		for (String string : result) {
+			if (first) first = false;
+			else s += ", ";
+			s += string;
+		}
+		Misc.debugInfo("Configuration \"%s\" = [%s]" , path, s);
 		return result;
 	}
 	

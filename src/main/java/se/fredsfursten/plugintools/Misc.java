@@ -9,8 +9,12 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
 
 public class Misc {
+	private static int doDebugPrint = -1;
+	private static JavaPlugin _plugin;
+
 	public static Block getFirstBlockOfMaterial(Material material, Location location, int maxDistance) {
 		int x1 = location.getBlockX(); 
 		int y1 = location.getBlockY();
@@ -51,6 +55,31 @@ public class Misc {
 		return player;
 	}
 
+	public static void enable(JavaPlugin plugin)
+	{
+		_plugin = plugin;
+	}
+
+	static boolean recursive = false;
+
+	static boolean shouldDebugPrint() {
+		if (recursive) return true;
+		try {
+			recursive = true;
+			if (doDebugPrint < 0) {
+				if (_plugin == null) {
+					Misc.warning("Misc has not been enabled.");
+					return true;
+				}
+				PluginConfig config = PluginConfig.get(_plugin);
+				doDebugPrint = config.getInt("DoDebugPrint", 0);
+			}
+			return doDebugPrint > 0;
+		} finally {
+			recursive = false;
+		}
+	}
+
 	public static void executeCommand(String command)
 	{
 		Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), command);
@@ -76,8 +105,7 @@ public class Misc {
 
 	public static void debugInfo(String format, Object... args) 
 	{
-		
-		info(format, args);
+		if (shouldDebugPrint()) info(format, args);
 	}
 
 	public static void info(String format, Object... args) 
@@ -101,7 +129,7 @@ public class Misc {
 	{
 		warning(format, args);
 	}
-	
+
 	public static void makeSureParentDirectoryExists(File file){
 		File directory = file.getParentFile();
 		if (!directory.exists())
