@@ -59,6 +59,16 @@ public class Misc {
 		Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), command);
 	}
 	
+	public static long secondsToTicks(double seconds)
+	{
+		return Math.round(20*seconds);
+	}
+	
+	public static double ticksToSeconds(long ticks)
+	{
+		return ticks/20.0;
+	}
+	
 	public static void consolePrintF(String format, Object... args) {
 		if (System.console() != null) System.console().printf(format, args);
 	}

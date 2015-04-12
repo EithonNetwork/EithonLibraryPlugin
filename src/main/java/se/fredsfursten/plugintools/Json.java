@@ -13,9 +13,13 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitScheduler;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
+
+import se.fredsfursten.eithonlibraryplugin.EithonLibraryPlugin;
 
 public class Json {
 	public static JSONObject fromLocation(Location location, boolean withWorld)
@@ -110,21 +114,69 @@ public class Json {
 		return (String) json.get("name");
 	}
 
-	public static int saveData(File file, JSONArray data) {
+	public static JSONObject fromBody(String name, int version, JSONArray payload)
+	{
+		JSONObject json = new JSONObject();
+		json.put("name", name);
+		json.put("version", version);
+		json.put("payLoad", payload);
+		return json;
+	}
+
+	public static JSONArray toBodyPayload(JSONObject json)
+	{
+		return (JSONArray) json.get("payload");
+	}
+
+	public static String toBodyName(JSONObject json)
+	{
+		return (String) json.get("name");
+	}
+
+	public static int toBodyVersion(JSONObject json)
+	{
+		return (int) json.get("version");
+	}
+
+	public static void save(File file, JSONObject data) {
 		try {
 			Writer writer = new FileWriter(file);
 			data.writeJSONString(writer);
 			writer.close();
+			Misc.info("Loaded \"%s\".", file.getName());
 		} catch (IOException e) {
-			Misc.info("Can't create file \"%s\" for save.", file.getName());
+			Misc.info("Can't create file \"%s\" for save: %s", file.getName(), e.getMessage());
 		} catch (Exception e) {
-			Misc.warning("Failed to save file \"%s\".", file.getName());
-			e.printStackTrace();
-			return 0;
+			Misc.warning("Failed to save file \"%s\": %s", file.getName(), e.getMessage());
 		}
-		return data.size();
+	}
+	
+	public static JSONObject load(File file) {
+		JSONObject data = null;
+		try {
+			Reader reader = new FileReader(file);
+			Object o = JSONValue.parseWithException(reader);
+			data = (JSONObject) o;
+			reader.close();
+			Misc.info("Loaded \"%s\".", file.getName());
+		} catch (FileNotFoundException e) {
+			Misc.info("Can't open file \"%s\" for load: %s", file.getName(), e.getMessage());
+		} catch (Exception e) {
+			Misc.warning("Failed to load file \"%s\": %s", file.getName(), e.getMessage());
+		}
+		return data;
+	}
+	
+	public static void delayedSave(File file, JSONObject data, JavaPlugin plugin) {
+		BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
+		scheduler.scheduleSyncDelayedTask(plugin, new Runnable() {
+			public void run() {
+				save(file, data);
+			}
+		});		
 	}
 
+	@Deprecated
 	public static JSONArray loadDataArray(File file) {
 		JSONArray jsonArray = null;
 		try {
@@ -141,5 +193,21 @@ public class Json {
 			return null;
 		}
 		return jsonArray;
+	}
+
+	@Deprecated
+	public static int saveData(File file, JSONArray data) {
+		try {
+			Writer writer = new FileWriter(file);
+			data.writeJSONString(writer);
+			writer.close();
+		} catch (IOException e) {
+			Misc.info("Can't create file \"%s\" for save.", file.getName());
+		} catch (Exception e) {
+			Misc.warning("Failed to save file \"%s\".", file.getName());
+			e.printStackTrace();
+			return 0;
+		}
+		return data.size();
 	}
 }
