@@ -1,5 +1,6 @@
 package se.fredsfursten.plugintools;
 
+import java.io.File;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
@@ -75,6 +76,7 @@ public class Misc {
 
 	public static void debugInfo(String format, Object... args) 
 	{
+		
 		info(format, args);
 	}
 
@@ -98,5 +100,13 @@ public class Misc {
 	public static void error(String format, Object... args) 
 	{
 		warning(format, args);
+	}
+	
+	public static void makeSureParentDirectoryExists(File file){
+		File directory = file.getParentFile();
+		if (!directory.exists())
+		{
+			directory.mkdirs();
+		}
 	}
 }

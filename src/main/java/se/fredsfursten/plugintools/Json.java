@@ -12,6 +12,7 @@ import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
@@ -44,6 +45,28 @@ public class Json {
 		float yaw = (float) (double) json.get("yaw");
 		float pitch = (float) (double) json.get("pitch");
 		return new Location(world, x, y, z, yaw, pitch);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static JSONObject fromBlock(Block block, boolean withWorld)
+	{
+		JSONObject json = new JSONObject();
+		if (withWorld) json.put("world", fromWorld(block.getWorld()));
+		json.put("x", block.getX());
+		json.put("y", block.getY());
+		json.put("z", block.getZ());
+		return json;
+	}
+
+	public static Block toBlock(JSONObject json, World world)
+	{
+		if (world == null) {
+			world = toWorld((JSONObject) json.get("world"));
+		}
+		int x = (int) json.get("x");
+		int y = (int) json.get("y");
+		int z = (int) json.get("z");
+		return world.getBlockAt(x, y, z);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -116,6 +139,7 @@ public class Json {
 		return (String) json.get("name");
 	}
 
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public static JSONObject fromBody(String name, int version, JSONArray payload)
 	{
@@ -126,9 +150,19 @@ public class Json {
 		return json;
 	}
 
-	public static JSONArray toBodyPayload(JSONObject json)
+	@SuppressWarnings("unchecked")
+	public static JSONObject fromBody(String name, int version, Object payload)
 	{
-		return (JSONArray) json.get("payload");
+		JSONObject json = new JSONObject();
+		json.put("name", name);
+		json.put("version", version);
+		json.put("payload", payload);
+		return json;
+	}
+
+	public static Object toBodyPayload(JSONObject json)
+	{
+		return json.get("payload");
 	}
 
 	public static String toBodyName(JSONObject json)
@@ -142,6 +176,7 @@ public class Json {
 	}
 
 	public static void save(File file, JSONObject data) {
+		Misc.makeSureParentDirectoryExists(file);
 		try {
 			Writer writer = new FileWriter(file);
 			data.writeJSONString(writer);
@@ -155,6 +190,7 @@ public class Json {
 	}
 
 	public static JSONObject load(File file) {
+		Misc.makeSureParentDirectoryExists(file);
 		JSONObject data = null;
 		try {
 			Reader reader = new FileReader(file);

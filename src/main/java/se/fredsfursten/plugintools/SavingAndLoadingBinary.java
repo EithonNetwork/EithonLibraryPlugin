@@ -6,14 +6,11 @@ import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+@Deprecated
 public class SavingAndLoadingBinary {
 	public static <T extends Object> void save(T obj,File file) throws Exception
 	{
-		File directory = file.getParentFile();
-		if (!directory.exists())
-		{
-			directory.mkdirs();
-		}
+		Misc.makeSureParentDirectoryExists(file);
 		
 		FileOutputStream fileOutputStream = new FileOutputStream(file);
 		ObjectOutputStream oos = new ObjectOutputStream(fileOutputStream);

@@ -5,59 +5,49 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.HashMap;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class PluginConfig {
-	private static PluginConfig singleton = null;
-	File configFile;
-	FileConfiguration config;
+	private File configFile;
+	private FileConfiguration config;
+	static HashMap<String, PluginConfig> instances = new HashMap<String, PluginConfig>();
 	private int doDebugPrint;
+	private JavaPlugin _plugin;
 
-	private PluginConfig()
+	private PluginConfig(JavaPlugin plugin)
+	{
+		this._plugin = plugin;
+	}
+	
+	public void enable()
+	{
+		initialize(this._plugin, "config.yml");
+	}
+	
+	public void disable()
 	{
 	}
 	
-	@Deprecated
-	public PluginConfig(JavaPlugin plugin, String fileName) {
-		initialize(plugin, fileName);
-	}
-	
-	public static void enable(JavaPlugin plugin, String fileName) {
-		if (singleton != null) {
-			plugin.getLogger().warning("PluginConfig.enable() has already been called, use PluginConfig.isEnabled() to check.");
-			return;
+	public static PluginConfig get(JavaPlugin plugin) {
+		PluginConfig config = instances.get(plugin.getName());
+		if (config == null) {
+			config = new PluginConfig(plugin);
+			instances.put(plugin.getName(), config);
 		}
-		singleton = new PluginConfig();
-		singleton.initialize(plugin, fileName);
+		return config;
 	}
 	
-	public static void enable(JavaPlugin plugin) {
-		enable(plugin, "config.yml");
-	}
-
 	private void initialize(JavaPlugin plugin, String fileName) {
 		this.configFile = initializeConfigFile(plugin, fileName);
 		this.config = new YamlConfiguration();
 		load();
 		this.doDebugPrint = this.config.getInt("DoDebugPrint");
-	}
-	
-	public static boolean isEnabled() { return singleton != null; }
-	
-	public static PluginConfig get() {
-		if (singleton == null) {
-			Misc.consolePrintF("You must call PluginConfig.enable() from your plugin.");
-		}
-		return singleton;
-	}
-	
-	public static void disable()
-	{
-		singleton = null;
 	}
 	
 	public double getDouble(String path, double defaultValue)
@@ -86,6 +76,19 @@ public class PluginConfig {
 		return result;
 	}
 	
+	public String getString(String path, String defaultValue)
+	{
+		String result;
+		try {
+			result = this.config.getString(path, defaultValue);
+		} catch (Exception ex) {
+			Misc.warning("Failed to read configuration \"%s\", will use default value.", path);
+			result = defaultValue;
+		}
+		Misc.debugInfo("Configuration \"%s\" = %s" , path, result);
+		return result;
+	}
+	
 	public Object get(String path, Object defaultValue)
 	{
 		Object result;
@@ -106,8 +109,8 @@ public class PluginConfig {
 
 	private File initializeConfigFile(JavaPlugin plugin, String fileName) {
 		File file = new File(plugin.getDataFolder(), fileName);
-		if(!file.exists()){
-			file.getParentFile().mkdirs();
+		Misc.makeSureParentDirectoryExists(file);
+		if(!file.exists()) {
 			copy(plugin.getResource(fileName), file);
 		}
 

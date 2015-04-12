@@ -3,6 +3,7 @@
   <groupId>se.fredsfursten</groupId>
   <artifactId>EithonLibraryPlugin</artifactId>
   <name>EithonLibraryPlugin</name>
+   <version>1.1</version>
   <build>
       <plugins>
           <plugin>
@@ -56,5 +57,4 @@
   		<version>[1.8,)</version>
   	</dependency>
    </dependencies>
-   <version>1.0</version>
 </project>
