@@ -114,7 +114,6 @@ public class Paginator {
 					wordVisibleCharacters = 0;
 				}
 				lines.add(line.toString());
-				String message = null;
 				line = new StringBuilder();
 				lineInPixels = 0;
 				lineVisibleCharacters = 0;

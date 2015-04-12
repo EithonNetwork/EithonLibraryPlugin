@@ -19,9 +19,8 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
-import se.fredsfursten.eithonlibraryplugin.EithonLibraryPlugin;
-
 public class Json {
+	@SuppressWarnings("unchecked")
 	public static JSONObject fromLocation(Location location, boolean withWorld)
 	{
 		JSONObject json = new JSONObject();
@@ -47,6 +46,7 @@ public class Json {
 		return new Location(world, x, y, z, yaw, pitch);
 	}
 
+	@SuppressWarnings("unchecked")
 	public static JSONObject fromPlayer(Player player)
 	{
 		JSONObject json = new JSONObject();
@@ -55,6 +55,7 @@ public class Json {
 		return json;
 	}
 
+	@SuppressWarnings("unchecked")
 	public static JSONObject fromPlayer(UUID id, String name)
 	{
 		JSONObject json = new JSONObject();
@@ -85,6 +86,7 @@ public class Json {
 		return (String) json.get("name");
 	}
 
+	@SuppressWarnings("unchecked")
 	public static JSONObject fromWorld(World world)
 	{
 		JSONObject json = new JSONObject();
@@ -114,12 +116,13 @@ public class Json {
 		return (String) json.get("name");
 	}
 
+	@SuppressWarnings("unchecked")
 	public static JSONObject fromBody(String name, int version, JSONArray payload)
 	{
 		JSONObject json = new JSONObject();
 		json.put("name", name);
 		json.put("version", version);
-		json.put("payLoad", payload);
+		json.put("payload", payload);
 		return json;
 	}
 
@@ -143,22 +146,32 @@ public class Json {
 			Writer writer = new FileWriter(file);
 			data.writeJSONString(writer);
 			writer.close();
-			Misc.info("Loaded \"%s\".", file.getName());
+			Misc.info("Saved \"%s\".", file.getName());
 		} catch (IOException e) {
 			Misc.info("Can't create file \"%s\" for save: %s", file.getName(), e.getMessage());
 		} catch (Exception e) {
 			Misc.warning("Failed to save file \"%s\": %s", file.getName(), e.getMessage());
 		}
 	}
-	
+
 	public static JSONObject load(File file) {
 		JSONObject data = null;
 		try {
 			Reader reader = new FileReader(file);
 			Object o = JSONValue.parseWithException(reader);
+			if (o == null) {
+				Misc.debugInfo("Load, phase parse returned empty.");
+			}
 			data = (JSONObject) o;
+			if (data == null) {
+				Misc.debugInfo("Load, phase cast returned empty.");
+			}
 			reader.close();
-			Misc.info("Loaded \"%s\".", file.getName());
+			if (data == null) {
+				Misc.warning("Loading \"%s\" resulted in null.", file.getName());
+			} else {
+				Misc.info("Loaded \"%s\".", file.getName());
+			}
 		} catch (FileNotFoundException e) {
 			Misc.info("Can't open file \"%s\" for load: %s", file.getName(), e.getMessage());
 		} catch (Exception e) {
@@ -166,7 +179,7 @@ public class Json {
 		}
 		return data;
 	}
-	
+
 	public static void delayedSave(File file, JSONObject data, JavaPlugin plugin) {
 		BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
 		scheduler.scheduleSyncDelayedTask(plugin, new Runnable() {

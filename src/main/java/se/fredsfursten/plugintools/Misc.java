@@ -10,10 +10,6 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
 public class Misc {
-	private static boolean doDebugPrint() {
-		return PluginConfig.get().shouldDebugPrint();
-	}
-	
 	public static Block getFirstBlockOfMaterial(Material material, Location location, int maxDistance) {
 		int x1 = location.getBlockX(); 
 		int y1 = location.getBlockY();
@@ -58,19 +54,23 @@ public class Misc {
 	{
 		Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), command);
 	}
-	
+
 	public static long secondsToTicks(double seconds)
 	{
 		return Math.round(20*seconds);
 	}
-	
+
 	public static double ticksToSeconds(long ticks)
 	{
 		return ticks/20.0;
 	}
-	
+
 	public static void consolePrintF(String format, Object... args) {
-		if (System.console() != null) System.console().printf(format, args);
+		try {
+			if (System.console() != null) System.console().printf(format, args);
+		} catch (Exception ex) {
+			if (System.console() != null) System.console().printf("Wrong format? \"%s\", %d arguments: %s", format, args.length, ex.getMessage());
+		}
 	}
 
 	public static void debugInfo(String format, Object... args) 
@@ -92,8 +92,7 @@ public class Misc {
 		try {
 			Bukkit.getLogger().warning(String.format(format, args));
 		} catch (Exception e) {
-			Bukkit.getLogger().warning(String.format("Wrong format? \"%s\", %d arguments: %s", format, args.length, e.getMessage()));
-		}
+			Misc.consolePrintF(format, args);		}
 	}
 
 	public static void error(String format, Object... args) 

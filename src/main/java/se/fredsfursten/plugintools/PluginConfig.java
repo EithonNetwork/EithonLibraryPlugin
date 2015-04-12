@@ -34,6 +34,10 @@ public class PluginConfig {
 		singleton = new PluginConfig();
 		singleton.initialize(plugin, fileName);
 	}
+	
+	public static void enable(JavaPlugin plugin) {
+		enable(plugin, "config.yml");
+	}
 
 	private void initialize(JavaPlugin plugin, String fileName) {
 		this.configFile = initializeConfigFile(plugin, fileName);
@@ -55,7 +59,47 @@ public class PluginConfig {
 	{
 		singleton = null;
 	}
-
+	
+	public double getDouble(String path, double defaultValue)
+	{
+		double result;
+		try {
+			result = this.config.getDouble(path, defaultValue);
+		} catch (Exception ex) {
+			Misc.warning("Failed to read configuration \"%s\", will use default value.", path);
+			result = defaultValue;
+		}
+		Misc.debugInfo("Configuration \"%s\" = %.2f" , path, result);
+		return result;
+	}
+	
+	public int getInt(String path, int defaultValue)
+	{
+		int result;
+		try {
+			result = this.config.getInt(path, defaultValue);
+		} catch (Exception ex) {
+			Misc.warning("Failed to read configuration \"%s\", will use default value.", path);
+			result = defaultValue;
+		}
+		Misc.debugInfo("Configuration \"%s\" = %d" , path, result);
+		return result;
+	}
+	
+	public Object get(String path, Object defaultValue)
+	{
+		Object result;
+		try {
+			result = this.config.get(path, defaultValue);
+		} catch (Exception ex) {
+			Misc.warning("Failed to read configuration \"%s\", will use default value.", path);
+			result = defaultValue;
+		}
+		Misc.debugInfo("Configuration \"%s\" = %s" , path, result.toString());
+		return result;
+	}
+	
+	@Deprecated
 	boolean shouldDebugPrint() {
 		return this.doDebugPrint > 0;
 	}
@@ -85,6 +129,7 @@ public class PluginConfig {
 		}
 	}
 
+	@Deprecated
 	public FileConfiguration getFileConfiguration()
 	{
 		return this.config;
