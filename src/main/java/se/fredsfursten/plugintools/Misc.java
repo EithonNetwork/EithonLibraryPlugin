@@ -80,6 +80,7 @@ public class Misc {
 		}
 	}
 
+	@Deprecated
 	public static void executeCommand(String command)
 	{
 		Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), command);
@@ -136,5 +137,12 @@ public class Misc {
 		{
 			directory.mkdirs();
 		}
+	}
+
+	public static boolean verifyPermission(Player player, String permission)
+	{
+		if (player.hasPermission(permission)) return true;
+		player.sendMessage("You must have permission " + permission);
+		return false;
 	}
 }
