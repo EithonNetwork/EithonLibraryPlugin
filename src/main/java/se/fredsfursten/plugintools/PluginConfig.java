@@ -23,13 +23,15 @@ public class PluginConfig {
 	private PluginConfig(JavaPlugin plugin)
 	{
 		this._plugin = plugin;
-	}
-	
-	public void enable()
-	{
 		initialize(this._plugin, "config.yml");
 	}
 	
+	@Deprecated
+	public void enable()
+	{
+	}
+	
+	@Deprecated
 	public void disable()
 	{
 	}
@@ -57,6 +59,7 @@ public class PluginConfig {
 			result = this.config.getDouble(path, defaultValue);
 		} catch (Exception ex) {
 			Misc.warning("Failed to read configuration \"%s\", will use default value.", path);
+			ex.printStackTrace();
 			result = defaultValue;
 		}
 		Misc.debugInfo("Configuration \"%s\" = %.2f" , path, result);
@@ -70,6 +73,7 @@ public class PluginConfig {
 			result = this.config.getInt(path, defaultValue);
 		} catch (Exception ex) {
 			Misc.warning("Failed to read configuration \"%s\", will use default value.", path);
+			ex.printStackTrace();
 			result = defaultValue;
 		}
 		Misc.debugInfo("Configuration \"%s\" = %d" , path, result);
@@ -83,6 +87,7 @@ public class PluginConfig {
 			result = this.config.getIntegerList(path);
 		} catch (Exception ex) {
 			Misc.warning("Failed to read configuration \"%s\", will use default value.", path);
+			ex.printStackTrace();
 		}
 		String s = "";
 		boolean first = true;
@@ -102,6 +107,7 @@ public class PluginConfig {
 			result = this.config.getString(path, defaultValue);
 		} catch (Exception ex) {
 			Misc.warning("Failed to read configuration \"%s\", will use default value.", path);
+			ex.printStackTrace();
 			result = defaultValue;
 		}
 		Misc.debugInfo("Configuration \"%s\" = %s" , path, result);
@@ -115,6 +121,7 @@ public class PluginConfig {
 			result = this.config.getStringList(path);
 		} catch (Exception ex) {
 			Misc.warning("Failed to read configuration \"%s\", will use default value.", path);
+			ex.printStackTrace();
 		}
 		String s = "";
 		boolean first = true;
@@ -134,6 +141,7 @@ public class PluginConfig {
 			result = this.config.get(path, defaultValue);
 		} catch (Exception ex) {
 			Misc.warning("Failed to read configuration \"%s\", will use default value.", path);
+			ex.printStackTrace();
 			result = defaultValue;
 		}
 		Misc.debugInfo("Configuration \"%s\" = %s" , path, result.toString());
@@ -182,8 +190,9 @@ public class PluginConfig {
 		if (this.doDebugPrint == 0) return;
 		try {
 			Bukkit.getLogger().info(String.format(format, args));
-		} catch (Exception e) {
-			Bukkit.getLogger().warning(String.format("Wrong format? \"%s\", %d arguments: %s", format, args.length, e.getMessage()));
+		} catch (Exception ex) {
+			Bukkit.getLogger().warning(String.format("Wrong format? \"%s\", %d arguments: %s", format, args.length, ex.getMessage()));
+			ex.printStackTrace();
 		}
 	}
 
