@@ -52,6 +52,10 @@ public class PluginConfig {
 		this.doDebugPrint = this.config.getInt("DoDebugPrint");
 	}
 	
+	public ConfigurableFormat getConfigurableFormat(String path, int parameters, String defaultValue) {
+		return new ConfigurableFormat(path, parameters, defaultValue, this);
+	}
+	
 	public double getDouble(String path, double defaultValue)
 	{
 		double result;

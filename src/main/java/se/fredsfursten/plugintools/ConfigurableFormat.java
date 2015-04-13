@@ -8,7 +8,15 @@ public class ConfigurableFormat {
 	private int _parameters;
 	private String _formatValue;
 
+	@Deprecated
 	public ConfigurableFormat(PluginConfig config, String path, int parameters, String defaultValue) {
+		this._path = path;
+		this._parameters = parameters;
+		String value = config.getString(path, defaultValue);
+		this._formatValue = value;
+	}
+	
+	ConfigurableFormat(String path, int parameters, String defaultValue, PluginConfig config) {
 		this._path = path;
 		this._parameters = parameters;
 		String value = config.getString(path, defaultValue);

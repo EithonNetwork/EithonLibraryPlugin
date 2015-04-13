@@ -138,4 +138,11 @@ public class Misc {
 			directory.mkdirs();
 		}
 	}
+
+	public static boolean verifyPermission(Player player, String permission)
+	{
+		if (player.hasPermission(permission)) return true;
+		player.sendMessage("You must have permission " + permission);
+		return false;
+	}
 }
