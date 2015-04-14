@@ -1,7 +1,9 @@
 package se.fredsfursten.plugintools;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.HashMap;
+
 import org.bukkit.entity.Player;
 
 public class CoolDown {
@@ -34,14 +36,10 @@ public class CoolDown {
 	public int secondsLeft(Player player) {
 		LocalDateTime endTime = this._playerCoolDownEnds.get(player);
 		if (endTime == null) return 0;
-		long secondsLeft = endTime.toEpochSecond(null)-LocalDateTime.now().toEpochSecond(null);
+		long secondsLeft = endTime.toEpochSecond(ZoneOffset.UTC)-LocalDateTime.now(ZoneOffset.UTC).toEpochSecond(null);
 		if (secondsLeft > 0) return (int) secondsLeft;
 		this._playerCoolDownEnds.remove(player);
 		return 0;
-	}
-
-	private boolean isBeforeEndTime(LocalDateTime endTime) {
-		return LocalDateTime.now().isBefore(endTime);
 	}
 }
 
