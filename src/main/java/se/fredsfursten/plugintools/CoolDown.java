@@ -36,7 +36,7 @@ public class CoolDown {
 	public int secondsLeft(Player player) {
 		LocalDateTime endTime = this._playerCoolDownEnds.get(player);
 		if (endTime == null) return 0;
-		long secondsLeft = endTime.toEpochSecond(ZoneOffset.UTC)-LocalDateTime.now(ZoneOffset.UTC).toEpochSecond(null);
+		long secondsLeft = endTime.toEpochSecond(ZoneOffset.UTC)-LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
 		if (secondsLeft > 0) return (int) secondsLeft;
 		this._playerCoolDownEnds.remove(player);
 		return 0;
