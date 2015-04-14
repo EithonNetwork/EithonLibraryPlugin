@@ -1,0 +1,48 @@
+package se.fredsfursten.plugintools;
+
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import org.bukkit.entity.Player;
+
+public class CoolDown {
+	private static HashMap<String, CoolDown> _coolDowns = new HashMap<String, CoolDown>();
+	private PlayerCollectionNoJson<LocalDateTime> _playerCoolDownEnds;
+	private int _defaultCoolDownPeriodInSeconds;
+	
+	public CoolDown(String name, int defaultCoolDownPeriodInSeconds) {
+		_coolDowns.put(name, this);
+		this._playerCoolDownEnds = new PlayerCollectionNoJson<LocalDateTime>();
+		this._defaultCoolDownPeriodInSeconds = defaultCoolDownPeriodInSeconds;
+	}
+	
+	public static CoolDown getCoolDown(String name) {
+		return _coolDowns.get(name);
+	}
+	
+	public void addPlayer(Player player) {
+		addPlayer(player, this._defaultCoolDownPeriodInSeconds);
+	}
+	
+	public void addPlayer(Player player, int coolDownPeriodInSeconds) {
+		this._playerCoolDownEnds.put(player, LocalDateTime.now().plusSeconds(coolDownPeriodInSeconds));
+	}
+	
+	public boolean isInCoolDownPeriod(Player player) {
+		return secondsLeft(player) > 0;
+	}
+	
+	public int secondsLeft(Player player) {
+		LocalDateTime endTime = this._playerCoolDownEnds.get(player);
+		if (endTime == null) return 0;
+		long secondsLeft = endTime.toEpochSecond(null)-LocalDateTime.now().toEpochSecond(null);
+		if (secondsLeft > 0) return (int) secondsLeft;
+		this._playerCoolDownEnds.remove(player);
+		return 0;
+	}
+
+	private boolean isBeforeEndTime(LocalDateTime endTime) {
+		return LocalDateTime.now().isBefore(endTime);
+	}
+}
+
+
