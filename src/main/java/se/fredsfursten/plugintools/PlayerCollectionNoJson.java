@@ -12,6 +12,9 @@ public class PlayerCollectionNoJson<T> implements Iterable<T>, Serializable {
 	private static final long serialVersionUID = 1L;
 	private HashMap<UUID, T> playerInfo = null;
 
+	public PlayerCollectionNoJson() {
+		this.playerInfo = new HashMap<UUID, T>();
+	}
 	public void put(Player player, T info) {
 		UUID id = player.getUniqueId();
 		put(id, info);
