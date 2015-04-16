@@ -20,6 +20,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
+@Deprecated
 public class Json {
 	@SuppressWarnings("unchecked")
 	public static JSONObject fromLocation(Location location, boolean withWorld)

@@ -13,6 +13,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
+@Deprecated
 public class PluginConfig {
 	private File configFile;
 	private FileConfiguration config;

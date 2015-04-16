@@ -1,6 +1,8 @@
 package se.fredsfursten.plugintools;
 
 import java.io.File;
+import java.io.FilenameFilter;
+import java.util.ArrayList;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
@@ -11,6 +13,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+@Deprecated
 public class Misc {
 	private static int doDebugPrint = -1;
 	private static JavaPlugin _plugin;
@@ -145,4 +148,25 @@ public class Misc {
 		player.sendMessage("You must have permission " + permission);
 		return false;
 	}
+
+	public static String [] fileNames(File folder, String extension) {
+		File[] files = null;
+		if (extension != null) {
+			files = folder.listFiles(new FilenameFilter() {
+				public boolean accept(File dir, String name) {
+					return name.toLowerCase().endsWith(extension);
+				}
+			});
+		} else {
+			files = folder.listFiles();
+		}
+		ArrayList<String> array = new ArrayList<String>();
+		for (File file : files) {
+			String fileName = file.getName();
+			if (extension != null) fileName = fileName.replace(extension,"");
+			array.add(fileName);
+		}
+		return array.toArray(new String[]{""});
+	}
+
 }

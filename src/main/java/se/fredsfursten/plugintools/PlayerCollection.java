@@ -9,6 +9,7 @@ import java.util.UUID;
 import org.bukkit.entity.Player;
 import org.json.simple.JSONArray;
 
+@Deprecated
 public class PlayerCollection<T extends IJson<T> & IUuidAndName> implements Iterable<T>, IJson<PlayerCollection<T>>, Serializable {
 	private static final long serialVersionUID = 1L;
 	private HashMap<UUID, T> playerInfo = null;
